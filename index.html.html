@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>六级30天打卡</title>
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --sub:#6b7280;
+      --line:#e5e7eb;
+      --dark:#111827;
+      --light:#f9fafb;
+      --accent:#2563eb;
+      --ok:#10b981;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --radius:22px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+      background:linear-gradient(to bottom,#eef2f7,#ffffff);
+      color:var(--text);
+    }
+    .app{
+      max-width:480px;
+      margin:0 auto;
+      min-height:100vh;
+      padding-bottom:88px;
+    }
+    .top{
+      position:sticky;
+      top:0;
+      z-index:10;
+      padding:16px 16px 12px;
+      background:rgba(243,244,246,.92);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.7);
+    }
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .muted{color:var(--sub)}
+    .title{font-size:30px;font-weight:800;line-height:1.1}
+    .badge{
+      display:inline-block;
+      padding:8px 12px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:999px;
+      font-size:13px;
+      color:#374151;
+      white-space:nowrap;
+    }
+    .card{
+      background:var(--card);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      margin:16px;
+      overflow:hidden;
+    }
+    .card-inner{padding:16px}
+    .progress-wrap{
+      margin-top:12px;
+      background:#fff;
+      border-radius:24px;
+      padding:14px;
+      border:1px solid var(--line);
+    }
+    .progress-bar{
+      margin-top:8px;
+      width:100%;
+      height:12px;
+      background:#e5e7eb;
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .progress-fill{
+      height:100%;
+      width:0%;
+      background:var(--dark);
+      transition:width .25s ease;
+      border-radius:999px;
+    }
+    .section-title{
+      font-size:19px;
+      font-weight:700;
+      margin:0 0 4px;
+    }
+    .task{
+      width:100%;
+      border:none;
+      background:#f8fafc;
+      padding:15px 16px;
+      border-radius:24px;
+      margin:10px 0 0;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-align:left;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .task:active{transform:scale(.985)}
+    .task.done{
+      background:var(--dark);
+      color:#fff;
+    }
+    .check{
+      width:26px;height:26px;border-radius:50%;
+      display:grid;place-items:center;
+      flex:0 0 26px;
+      font-size:15px;
+      border:2px solid #cbd5e1;
+      color:#9ca3af;
+      background:#fff;
+    }
+    .task.done .check{
+      border-color:#fff;
+      color:#111827;
+      background:#fff;
+      font-weight:700;
+    }
+    .icon{
+      width:22px;
+      text-align:center;
+      flex:0 0 22px;
+      font-size:17px;
+      opacity:.9;
+    }
+    .task.done .icon{opacity:1}
+    .task-text{
+      line-height:1.5;
+      font-size:15px;
+      word-break:break-word;
+    }
+    .task.done .task-text{
+      text-decoration:line-through;
+      opacity:.95;
+    }
+    textarea{
+      width:100%;
+      min-height:140px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:14px;
+      resize:vertical;
+      outline:none;
+      font-size:14px;
+      font-family:inherit;
+      color:var(--text);
+      background:#fff;
+    }
+    .btn-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      padding:0 16px;
+    }
+    .btn, .btn-outline{
+      height:48px;
+      border-radius:18px;
+      border:none;
+      cursor:pointer;
+      font-size:15px;
+      font-weight:600;
+    }
+    .btn{
+      background:var(--dark);
+      color:#fff;
+    }
+    .btn-outline{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+    .stats-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    .stat{
+      background:#f8fafc;
+      border-radius:22px;
+      padding:14px;
+    }
+    .stat-label{
+      font-size:12px;
+      color:var(--sub);
+    }
+    .stat-value{
+      margin-top:6px;
+      font-size:27px;
+      font-weight:800;
+    }
+    .days-grid{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:8px;
+      margin-top:8px;
+    }
+    .day-box{
+      border:none;
+      background:#f8fafc;
+      border-radius:18px;
+      padding:12px 6px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .day-box.active{
+      background:var(--dark);
+      color:#fff;
+    }
+    .day-box.done{
+      background:#e5e7eb;
+    }
+    .day-num{font-weight:700}
+    .day-sub{font-size:11px;margin-top:4px;color:inherit;opacity:.75}
+    .bottom{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      background:rgba(255,255,255,.96);
+      border-top:1px solid var(--line);
+      backdrop-filter:blur(10px);
+      z-index:20;
+    }
+    .bottom-inner{
+      max-width:480px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:8px;
+      padding:10px 12px;
+    }
+    .nav-btn{
+      border:none;
+      background:transparent;
+      padding:10px 6px;
+      border-radius:18px;
+      cursor:pointer;
+      color:var(--sub);
+      font-size:12px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
+    .nav-btn.active{
+      background:var(--dark);
+      color:#fff;
+    }
+    .nav-icon{font-size:18px}
+    .hidden{display:none}
+    .small{font-size:13px}
+    .tip{
+      background:#f8fafc;
+      padding:14px;
+      border-radius:22px;
+      line-height:1.7;
+      color:#4b5563;
+      font-size:14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <div class="row">
+        <div>
+          <div class="muted small">英语六级 30 天计划</div>
+          <div class="title" id="dayTitle">Day 1</div>
+        </div>
+        <div class="badge" id="focusBadge">进入状态</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="row small">
+          <span>今日进度</span>
+          <strong id="dayProgressText">0%</strong>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="dayProgressBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="tab-today">
+      <div class="card">
+        <div class="card-inner">
+          <div class="section-title">今天任务</div>
+          <div class="muted small">完成一项就点一下打勾</div>
+          <div id="taskList"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-inner">
+          <div class="section-title">今日备注 / 错词 / 复盘</div>
+          <textarea id="noteInput" placeholder="记录错词、问题、明天重点补什么……"></textarea>
+        </div>
+      </div>
+
+      <div class="btn-grid">
+        <button class="btn-outline" id="prevBtn">← 上一天</button>
+        <button class="btn" id="nextBtn">下一天 →</button>
+      </div>
+    </section>
+
+    <section id="tab-stats" class="hidden">
+      <div class="card">
+        <div class="card-inner">
+          <div class="section-title">总进度</div>
+          <div class="progress-wrap" style="margin-top:12px">
+            <div class="row small">
+              <span>30 天完成度</span>
+              <strong id="totalProgressText">0%</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="totalProgressBar"></div>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat">
+              <div class="stat-label">已完成天数</div>
+              <div class="stat-value" id="finishedDays">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">连续完成</div>
+              <div class="stat-value" id="streakDays">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">已打卡任务</div>
+              <div class="stat-value" id="doneTasks">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">剩余任务</div>
+              <div class="stat-value" id="leftTasks">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-inner">
+          <div class="section-title">30 天总览</div>
+          <div class="days-grid" id="daysGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-more" class="hidden">
+      <div class="card">
+        <div class="card-inner">
+          <div class="section-title">使用说明</div>
+          <div class="tip">
+            1. 点一下任务卡片就能打勾。<br>
+            2. 进度会自动保存在当前浏览器。<br>
+            3. 总览页可以快速跳到任意一天。<br>
+            4. 备注区可以记录错词、复盘和明天补强重点。
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-inner">
+          <div class="section-title">操作</div>
+          <div class="btn-grid" style="padding:0">
+            <button class="btn-outline" id="resetDayBtn">重置当天</button>
+            <button class="btn-outline" id="resetAllBtn">清空全部</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="bottom">
+    <div class="bottom-inner">
+      <button class="nav-btn active" data-tab="today">
+        <span class="nav-icon">🏠</span>
+        <span>今天</span>
+      </button>
+      <button class="nav-btn" data-tab="stats">
+        <span class="nav-icon">📊</span>
+        <span>统计</span>
+      </button>
+      <button class="nav-btn" data-tab="more">
+        <span class="nav-icon">📝</span>
+        <span>更多</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "cet6-30day-checkin-html-v1";
+
+    const plan = [
+      { day: 1, focus: "进入状态", tasks: ["单词：80新词+20复习","听力：长对话1套","阅读：仔细阅读2篇","写作：背开头模板2个","复盘：整理错词10个"] },
+      { day: 2, focus: "进入状态", tasks: ["单词：80新词+复习","听力：听力篇章1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：汉译英1段","复盘：总结听力错因"] },
+      { day: 3, focus: "进入状态", tasks: ["单词：80新词+复习","听力：讲座/讲话1套","阅读：仔细阅读2篇","写作：背结尾模板2个","复盘：记录阅读错因"] },
+      { day: 4, focus: "进入状态", tasks: ["单词：80新词+复习","听力：长对话1套+精听","阅读：选词填空1篇+仔细阅读1篇","翻译：汉译英1段","复盘：整理翻译不会表达"] },
+      { day: 5, focus: "进入状态", tasks: ["单词：80新词+复习","听力：听力篇章1套","阅读：仔细阅读2篇","写作：短作文1篇","复盘：积累5个万能句"] },
+      { day: 6, focus: "进入状态", tasks: ["单词：80新词+复习","听力：讲座/讲话1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：汉译英1段","复盘：总结本周高频错词"] },
+      { day: 7, focus: "周复盘", tasks: ["单词：复习本周全部","听力：整套限时","阅读：整套限时","写作/翻译：完整训练1项","复盘：总结最薄弱2项"] },
+      { day: 8, focus: "稳定输出", tasks: ["单词：80新词+复习","听力：长对话1套","阅读：仔细阅读2篇","写作：背图表/现象类模板","复盘：错题整理"] },
+      { day: 9, focus: "稳定输出", tasks: ["单词：80新词+复习","听力：听力篇章1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：传统文化主题1段","复盘：积累表达5个"] },
+      { day: 10, focus: "稳定输出", tasks: ["单词：80新词+复习","听力：讲座/讲话1套","阅读：仔细阅读2篇","写作：作文1篇","复盘：改作文结构和语法"] },
+      { day: 11, focus: "稳定输出", tasks: ["单词：80新词+复习","听力：长对话1套+精听","阅读：选词填空1篇+仔细阅读1篇","翻译：科技主题1段","复盘：整理听力易错词"] },
+      { day: 12, focus: "稳定输出", tasks: ["单词：80新词+复习","听力：听力篇章1套","阅读：仔细阅读2篇","写作：背中间段万能句5个","复盘：阅读定位训练"] },
+      { day: 13, focus: "稳定输出", tasks: ["单词：80新词+复习","听力：讲座/讲话1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：教育主题1段","复盘：总结本周翻译问题"] },
+      { day: 14, focus: "周复盘", tasks: ["单词：复习第8-13天","听力：整套训练","阅读：整套训练","写作：完整作文1篇","复盘：第二周总结"] },
+      { day: 15, focus: "强化期", tasks: ["单词：70新词+复习","听力：长对话1套","阅读：仔细阅读2篇","写作：背1套开头+结尾","复盘：错词复习"] },
+      { day: 16, focus: "强化期", tasks: ["单词：70新词+复习","听力：听力篇章1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：社会发展主题1段","复盘：翻译句型整理"] },
+      { day: 17, focus: "强化期", tasks: ["单词：70新词+复习","听力：讲座/讲话1套","阅读：仔细阅读2篇","写作：作文1篇","复盘：检查语法和连接词"] },
+      { day: 18, focus: "强化期", tasks: ["单词：70新词+复习","听力：长对话1套+精听跟读","阅读：选词填空1篇+仔细阅读1篇","翻译：历史文化主题1段","复盘：整理不会短语"] },
+      { day: 19, focus: "强化期", tasks: ["单词：70新词+复习","听力：听力篇章1套","阅读：仔细阅读2篇","写作：背5个高级替换表达","复盘：长难句分析3句"] },
+      { day: 20, focus: "强化期", tasks: ["单词：70新词+复习","听力：讲座/讲话1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：经济/生活主题1段","复盘：总结常错题型"] },
+      { day: 21, focus: "周复盘", tasks: ["单词：复习本周全部","听力：完整限时","阅读：完整限时","写作/翻译：完整训练1项","复盘：第三周总结"] },
+      { day: 22, focus: "冲刺手感", tasks: ["单词：复习高频核心词100个","听力：长对话1套","阅读：仔细阅读2篇","写作：整理作文模板","复盘：背诵模板"] },
+      { day: 23, focus: "冲刺手感", tasks: ["单词：复习高频核心词100个","听力：听力篇章1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：完整翻译1题","复盘：整理翻译高频表达"] },
+      { day: 24, focus: "冲刺手感", tasks: ["单词：复习高频核心词100个","听力：讲座/讲话1套","阅读：仔细阅读2篇","写作：完整作文1篇","复盘：作文控制在30分钟"] },
+      { day: 25, focus: "冲刺手感", tasks: ["单词：复习高频核心词100个","听力：长对话1套+精听","阅读：选词填空1篇+仔细阅读1篇","翻译：完整翻译1题","复盘：错题回看"] },
+      { day: 26, focus: "冲刺手感", tasks: ["单词：复习高频核心词100个","听力：听力篇章1套","阅读：仔细阅读2篇","写作：背熟10个万能句","复盘：阅读定位训练"] },
+      { day: 27, focus: "冲刺手感", tasks: ["单词：复习高频核心词100个","听力：讲座/讲话1套","阅读：信息匹配1篇+仔细阅读1篇","翻译：完整翻译1题","复盘：总结近1个月提分点"] },
+      { day: 28, focus: "周复盘", tasks: ["单词：总复习","听力：整套训练","阅读：整套训练","写作：完整作文1篇","复盘：模拟考试总结"] },
+      { day: 29, focus: "查漏补缺", tasks: ["单词：只复习错词本","听力：最薄弱题型2套","阅读：最薄弱题型专项","写作：背自己的模板","翻译：回顾高频表达"] },
+      { day: 30, focus: "收尾巩固", tasks: ["单词：轻量复习","听力：1套保持手感","阅读：2篇保持手感","写作：默写开头结尾模板","复盘：总结30天完成情况"] }
+    ];
+
+    let state = {
+      currentDay: 1,
+      checked: {},
+      notes: {},
+      tab: "today"
+    };
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        state.currentDay = parsed.currentDay || 1;
+        state.checked = parsed.checked || {};
+        state.notes = parsed.notes || {};
+        state.tab = parsed.tab || "today";
+      } catch (e) {}
+    }
+
+    function getCurrentPlan() {
+      return plan.find(p => p.day === state.currentDay) || plan[0];
+    }
+
+    function getCheckedArray(day) {
+      const p = plan.find(x => x.day === day);
+      if (!state.checked[day]) {
+        state.checked[day] = new Array(p.tasks.length).fill(false);
+      }
+      return state.checked[day];
+    }
+
+    function getDayProgress(day) {
+      const p = plan.find(x => x.day === day);
+      const done = getCheckedArray(day).filter(Boolean).length;
+      return {
+        done,
+        total: p.tasks.length,
+        percent: Math.round(done / p.tasks.length * 100)
+      };
+    }
+
+    function getTotals() {
+      let totalTasks = 0;
+      let doneTasks = 0;
+      let finishedDays = 0;
+      for (const item of plan) {
+        totalTasks += item.tasks.length;
+        const done = getCheckedArray(item.day).filter(Boolean).length;
+        doneTasks += done;
+        if (done === item.tasks.length) finishedDays++;
+      }
+      let streak = 0;
+      for (const item of plan) {
+        const done = getCheckedArray(item.day).filter(Boolean).length;
+        if (done === item.tasks.length) streak++;
+        else break;
+      }
+      return {
+        totalTasks,
+        doneTasks,
+        finishedDays,
+        leftTasks: totalTasks - doneTasks,
+        percent: Math.round(doneTasks / totalTasks * 100),
+        streak
+      };
+    }
+
+    function iconForTask(text) {
+      if (text.startsWith("单词")) return "📘";
+      if (text.startsWith("听力")) return "🎧";
+      if (text.startsWith("阅读")) return "📖";
+      if (text.startsWith("翻译")) return "🌐";
+      if (text.startsWith("写作")) return "✍️";
+      return "✅";
+    }
+
+    function renderToday() {
+      const current = getCurrentPlan();
+      const progress = getDayProgress(state.currentDay);
+
+      document.getElementById("dayTitle").textContent = "Day " + current.day;
+      document.getElementById("focusBadge").textContent = current.focus;
+      document.getElementById("dayProgressText").textContent = progress.percent + "%";
+      document.getElementById("dayProgressBar").style.width = progress.percent + "%";
+
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+
+      current.tasks.forEach((task, index) => {
+        const done = getCheckedArray(state.currentDay)[index];
+        const btn = document.createElement("button");
+        btn.className = "task" + (done ? " done" : "");
+        btn.innerHTML = `
+          <div class="check">${done ? "✓" : ""}</div>
+          <div class="icon">${iconForTask(task)}</div>
+          <div class="task-text">${task}</div>
+        `;
+        btn.onclick = () => {
+          const arr = getCheckedArray(state.currentDay);
+          arr[index] = !arr[index];
+          saveState();
+          render();
+        };
+        taskList.appendChild(btn);
+      });
+
+      document.getElementById("noteInput").value = state.notes[state.currentDay] || "";
+    }
+
+    function renderStats() {
+      const total = getTotals();
+      document.getElementById("totalProgressText").textContent = total.percent + "%";
+      document.getElementById("totalProgressBar").style.width = total.percent + "%";
+      document.getElementById("finishedDays").textContent = total.finishedDays;
+      document.getElementById("streakDays").textContent = total.streak;
+      document.getElementById("doneTasks").textContent = total.doneTasks;
+      document.getElementById("leftTasks").textContent = total.leftTasks;
+
+      const daysGrid = document.getElementById("daysGrid");
+      daysGrid.innerHTML = "";
+      plan.forEach(item => {
+        const prog = getDayProgress(item.day);
+        const btn = document.createElement("button");
+        let cls = "day-box";
+        if (item.day === state.currentDay) cls += " active";
+        else if (prog.done === prog.total) cls += " done";
+        btn.className = cls;
+        btn.innerHTML = `
+          <div class="day-num">${item.day}</div>
+          <div class="day-sub">${prog.done}/${prog.total}</div>
+        `;
+        btn.onclick = () => {
+          state.currentDay = item.day;
+          state.tab = "today";
+          saveState();
+          render();
+        };
+        daysGrid.appendChild(btn);
+      });
+    }
+
+    function renderTabs() {
+      const tabs = ["today","stats","more"];
+      tabs.forEach(t => {
+        document.getElementById("tab-" + t).classList.toggle("hidden", state.tab !== t);
+      });
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === state.tab);
+      });
+    }
+
+    function render() {
+      renderToday();
+      renderStats();
+      renderTabs();
+    }
+
+    document.getElementById("noteInput").addEventListener("input", function(e){
+      state.notes[state.currentDay] = e.target.value;
+      saveState();
+    });
+
+    document.getElementById("prevBtn").onclick = function() {
+      state.currentDay = Math.max(1, state.currentDay - 1);
+      saveState();
+      render();
+    };
+
+    document.getElementById("nextBtn").onclick = function() {
+      state.currentDay = Math.min(30, state.currentDay + 1);
+      saveState();
+      render();
+    };
+
+    document.getElementById("resetDayBtn").onclick = function() {
+      if (!confirm("确定重置当天打卡和备注吗？")) return;
+      const p = getCurrentPlan();
+      state.checked[state.currentDay] = new Array(p.tasks.length).fill(false);
+      state.notes[state.currentDay] = "";
+      saveState();
+      render();
+    };
+
+    document.getElementById("resetAllBtn").onclick = function() {
+      if (!confirm("确定清空全部 30 天进度吗？")) return;
+      state.checked = {};
+      state.notes = {};
+      state.currentDay = 1;
+      state.tab = "today";
+      saveState();
+      render();
+    };
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.onclick = function() {
+        state.tab = btn.dataset.tab;
+        saveState();
+        render();
+      };
+    });
+
+    loadState();
+    render();
+  </script>
+</body>
+</html>
